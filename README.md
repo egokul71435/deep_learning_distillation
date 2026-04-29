@@ -8,15 +8,15 @@ Everything runs on Apple Silicon. No cloud GPUs were used for training.
 
 ## Overview
 
-| | |
-|---|---|
-| **Student** | Llama-3.2-3B-Instruct |
-| **Teachers** | GPT-oss-120B (via OpenRouter), Llama-3.3-70B-Instruct-Turbo (via Together AI) |
-| **Methods** | Offline sequence KD, sparse logit KD |
-| **Training** | LoRA adapters only, 0.17% of parameters trainable |
-| **Benchmarks** | SciBench (university science), TheoremQA (math/theorems) |
-| **Evaluation** | Numeric accuracy + BERTScore F1 against teacher CoTs |
-| **Hardware** | Apple Silicon (MPS / CPU) |
+|                |                                                                               |
+| -------------- | ----------------------------------------------------------------------------- |
+| **Student**    | Llama-3.2-3B-Instruct                                                         |
+| **Teachers**   | GPT-oss-120B (via OpenRouter), Llama-3.3-70B-Instruct-Turbo (via Together AI) |
+| **Methods**    | Offline sequence KD, sparse logit KD                                          |
+| **Training**   | LoRA adapters only, 0.17% of parameters trainable                             |
+| **Benchmarks** | SciBench (university science), TheoremQA (math/theorems)                      |
+| **Evaluation** | Numeric accuracy + BERTScore F1 against teacher CoTs                          |
+| **Hardware**   | Apple Silicon (MPS / CPU)                                                     |
 
 ---
 
@@ -48,12 +48,12 @@ Inference APIs don't give you the full vocabulary distribution. You only get the
 
 We ran four configurations, keeping everything else constant (same student, same LoRA config, same training hyperparameters) so the comparison is fair:
 
-| Name | Teacher | Strategy | Alpha |
-|---|---|---|---|
-| **base** | none | no adapter, raw Llama-3.2-3B | n/a |
-| **gpt_seq** | GPT-oss-120B | sequence KD | 1.0 |
-| **llama_seq** | Llama-3.3-70B | sequence KD | 1.0 |
-| **llama_logit** | Llama-3.3-70B | sequence + logit KD | 0.5 |
+| Name            | Teacher       | Strategy                     | Alpha |
+| --------------- | ------------- | ---------------------------- | ----- |
+| **base**        | none          | no adapter, raw Llama-3.2-3B | n/a   |
+| **gpt_seq**     | GPT-oss-120B  | sequence KD                  | 1.0   |
+| **llama_seq**   | Llama-3.3-70B | sequence KD                  | 1.0   |
+| **llama_logit** | Llama-3.3-70B | sequence + logit KD          | 0.5   |
 
 LoRA was the same everywhere: rank 16, alpha 32, targeting `q_proj` and `v_proj`, 5% dropout. Training was 1 epoch, AdamW at 2e-4, batch size 4 with 4 gradient accumulation steps.
 
@@ -67,31 +67,31 @@ This measures how closely the student's generated reasoning matches the teacher'
 
 **Compared to GPT teacher CoTs:**
 
-| Model | SciBench | TheoremQA | Overall |
-|---|---|---|---|
-| base | 0.9503 | 0.9487 | 0.9494 |
-| gpt_seq | **0.9648** | **0.9590** | **0.9613** |
-| llama_seq | 0.9519 | 0.9513 | 0.9516 |
-| llama_logit | 0.9491 | 0.9499 | 0.9498 |
+| Model       | SciBench   | TheoremQA  | Overall    |
+| ----------- | ---------- | ---------- | ---------- |
+| base        | 0.9503     | 0.9487     | 0.9494     |
+| gpt_seq     | **0.9648** | **0.9590** | **0.9613** |
+| llama_seq   | 0.9519     | 0.9513     | 0.9516     |
+| llama_logit | 0.9491     | 0.9499     | 0.9498     |
 
 **Compared to Llama teacher CoTs:**
 
-| Model | SciBench | TheoremQA | Overall |
-|---|---|---|---|
-| base | 0.9648 | 0.9631 | 0.9639 |
-| gpt_seq | 0.9616 | 0.9576 | 0.9595 |
-| llama_seq | **0.9696** | **0.9691** | **0.9693** |
-| llama_logit | 0.9667 | 0.9643 | 0.9662 |
+| Model       | SciBench   | TheoremQA  | Overall    |
+| ----------- | ---------- | ---------- | ---------- |
+| base        | 0.9648     | 0.9631     | 0.9639     |
+| gpt_seq     | 0.9616     | 0.9576     | 0.9595     |
+| llama_seq   | **0.9696** | **0.9691** | **0.9693** |
+| llama_logit | 0.9667     | 0.9643     | 0.9662     |
 
 ### Numeric Accuracy
 
 Extracted the final number from each response and compared to ground truth with 5% tolerance.
 
-| Model | SciBench | TheoremQA | Overall |
-|---|---|---|---|
-| base | 9.8% | 15.7% | 13.3% |
-| gpt_seq | 11.1% | 15.7% | 13.8% |
-| llama_seq | 9.2% | 13.3% | 11.5% |
+| Model       | SciBench  | TheoremQA | Overall   |
+| ----------- | --------- | --------- | --------- |
+| base        | 9.8%      | 15.7%     | 13.3%     |
+| gpt_seq     | 11.1%     | 15.7%     | 13.8%     |
+| llama_seq   | 9.2%      | 13.3%     | 11.5%     |
 | llama_logit | **14.7%** | **19.1%** | **17.2%** |
 
 These numbers are low across the board, which is expected for university-level problems on a 3B model. That said, logit KD produced the best accuracies by a clear margin (17.2% overall vs 13.3% for the base), even though it didn't score the highest BERTScores. This suggests the token-level probability signal from the teacher helps the student get to the right answer more often, even when the overall reasoning style doesn't match the teacher as closely as sequence KD does.
@@ -135,6 +135,9 @@ deep_learning_distillation/
 │   ├── gpt_seq/                 # GPT sequence-KD model
 │   ├── llama_seq/               # Llama sequence-KD model
 │   └── llama_logit/             # Llama logit-KD model
+├── dataset_creation/
+│   ├── dataset_creation.py      # script to create the CoT expert dataset
+│   ├── split_dataset.py         # script to split only the correct answer traces into train and split
 │
 │   # Trained adapters
 └── output/
@@ -148,6 +151,8 @@ Each `eval_results/` subfolder contains `responses.jsonl` (per-problem predictio
 ---
 
 ## How the Code Fits Together
+
+**`dataset_creation.py`** handles creating the ground truth dataset using the teacher model. It prompts the model to solve each problem by outputting reasoning traces. split_dataset.py then splits this ground truth dataset into train and test variants.
 
 **`kd_trainer.py`** is the center of it all. It subclasses HuggingFace's Trainer and handles three modes depending on what's in the batch: pure sequence KD (alpha=1, no logprobs), pure logit KD (alpha=0), or a mix. The sparse KL computation temperature-scales both sides, gathers the student's log-softmax at the teacher's top-k positions, renormalizes the teacher's top-k into a proper distribution, and computes forward KL with the standard T² correction.
 
